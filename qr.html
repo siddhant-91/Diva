@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Exhibition QR Code</title>
+
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      background-size: 400% 400%;
+      animation: bgShift 10s ease infinite;
+      color: white;
+      font-family: "Poppins", sans-serif;
+      text-align: center;
+    }
+
+    @keyframes bgShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .qr-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+    }
+
+    #qrcode {
+      margin: 20px auto;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: #e0e0e0;
+    }
+
+    .callout {
+      margin-top: 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 1rem;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="qr-box">
+    <h2>Your Exhibition Entry Pass</h2>
+    <div id="qrcode"></div>
+    <p id="entryInfo"></p>
+    <div class="callout">
+      📸 Please take a screenshot of this QR code.  
+      It will be scanned at the exhibition entrance for your entry.
+    </div>
+  </div>
+
+  <!-- QR code library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    // Retrieve form data
+    const entry = JSON.parse(localStorage.getItem("currentEntry"));
+    if (!entry) {
+      document.body.innerHTML = "<h2>⚠️ No entry found. Please fill the form first.</h2>";
+    } else {
+      // Generate QR with unique ID
+      const qrText = `ExhibitionEntry_${entry.id}_${entry.name}`;
+      new QRCode(document.getElementById("qrcode"), {
+        text: qrText,
+        width: 180,
+        height: 180,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      document.getElementById("entryInfo").textContent =
+        `Your unique entry ID: #${entry.id}`;
+    }
+  </script>
+</body>
+</html>
