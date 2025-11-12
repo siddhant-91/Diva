@@ -77,7 +77,7 @@
     if (!entry) {
       document.body.innerHTML = "<h2>⚠️ No entry found. Please fill the form first.</h2>";
     } else {
-      // Generate QR with unique ID
+      // Generate QR with unique IDconst qrText = `${window.location.origin}/admit.html?id=${entry.id}`;
       const qrText = `ExhibitionEntry_${entry.id}_${entry.name}`;
       new QRCode(document.getElementById("qrcode"), {
         text: qrText,
