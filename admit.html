@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exhibition Admission Portal</title>
+
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      background: linear-gradient(135deg, #00203f, #1a5f7a, #00b4d8);
+      background-size: 400% 400%;
+      animation: bgMove 10s ease infinite;
+      color: white;
+      font-family: "Poppins", sans-serif;
+      text-align: center;
+    }
+
+    @keyframes bgMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 2rem 3rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+      max-width: 400px;
+      transition: 0.3s ease;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+    }
+
+    .status {
+      margin: 1rem 0;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .status.pending {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .status.success {
+      background: rgba(0, 255, 127, 0.2);
+      color: #00ff9d;
+    }
+
+    .status.error {
+      background: rgba(255, 0, 0, 0.2);
+      color: #ff7070;
+    }
+
+    button {
+      background: #00b4d8;
+      border: none;
+      color: white;
+      padding: 0.8rem 1.2rem;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background: #0077b6;
+      transform: translateY(-2px);
+    }
+
+    .footer {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Exhibition Entry Verification</h2>
+    <div id="userName"></div>
+    <div id="statusBox" class="status pending">Verifying user...</div>
+    <button id="admitBtn" style="display:none;">Admit User</button>
+    <div class="footer">🏠 Real Estate Expo 2025</div>
+  </div>
+
+  <script>
+    // Simulated DB — list of all entries
+    let db = JSON.parse(localStorage.getItem("entriesDB")) || [];
+
+    // Get ID from query
+    const params = new URLSearchParams(window.location.search);
+    const id = parseInt(params.get("id"));
+
+    const userNameEl = document.getElementById("userName");
+    const statusEl = document.getElementById("statusBox");
+    const admitBtn = document.getElementById("admitBtn");
+
+    if (!id) {
+      statusEl.textContent = "Invalid QR code. No ID found.";
+      statusEl.className = "status error";
+    } else {
+      // Find user by ID
+      const user = db.find(u => u.id === id);
+      if (!user) {
+        statusEl.textContent = "User not found in database.";
+        statusEl.className = "status error";
+      } else {
+        userNameEl.innerHTML = `<h3>👤 ${user.name}</h3>`;
+        if (user.admitted) {
+          statusEl.textContent = "✅ User already admitted.";
+          statusEl.className = "status success";
+        } else {
+          statusEl.textContent = "User not yet admitted.";
+          statusEl.className = "status pending";
+          admitBtn.style.display = "inline-block";
+
+          admitBtn.addEventListener("click", () => {
+            user.admitted = true;
+            localStorage.setItem("entriesDB", JSON.stringify(db));
+
+            statusEl.textContent = "✅ User admitted successfully!";
+            statusEl.className = "status success";
+            admitBtn.style.display = "none";
+          });
+        }
+      }
+    }
+  </script>
+</body>
+</html>
