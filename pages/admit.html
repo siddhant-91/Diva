@@ -33,12 +33,6 @@
       border-radius: 20px;
       box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
       max-width: 400px;
-      transition: 0.3s ease;
-    }
-
-    h2 {
-      margin-bottom: 1rem;
-      font-size: 1.8rem;
     }
 
     .status {
@@ -48,14 +42,14 @@
       font-weight: 600;
     }
 
-    .status.pending {
-      background: rgba(255, 255, 255, 0.2);
-      color: #fff;
-    }
-
     .status.success {
       background: rgba(0, 255, 127, 0.2);
       color: #00ff9d;
+    }
+
+    .status.pending {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
     }
 
     .status.error {
@@ -79,12 +73,6 @@
       background: #0077b6;
       transform: translateY(-2px);
     }
-
-    .footer {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      color: #e0e0e0;
-    }
   </style>
 </head>
 <body>
@@ -93,14 +81,10 @@
     <div id="userName"></div>
     <div id="statusBox" class="status pending">Verifying user...</div>
     <button id="admitBtn" style="display:none;">Admit User</button>
-    <div class="footer">🏠 Real Estate Expo 2025</div>
   </div>
 
   <script>
-    // Simulated DB — list of all entries
     let db = JSON.parse(localStorage.getItem("entriesDB")) || [];
-
-    // Get ID from query
     const params = new URLSearchParams(window.location.search);
     const id = parseInt(params.get("id"));
 
@@ -112,7 +96,6 @@
       statusEl.textContent = "Invalid QR code. No ID found.";
       statusEl.className = "status error";
     } else {
-      // Find user by ID
       const user = db.find(u => u.id === id);
       if (!user) {
         statusEl.textContent = "User not found in database.";
@@ -130,7 +113,6 @@
           admitBtn.addEventListener("click", () => {
             user.admitted = true;
             localStorage.setItem("entriesDB", JSON.stringify(db));
-
             statusEl.textContent = "✅ User admitted successfully!";
             statusEl.className = "status success";
             admitBtn.style.display = "none";

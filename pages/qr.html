@@ -43,11 +43,6 @@
       letter-spacing: 1px;
     }
 
-    p {
-      font-size: 0.95rem;
-      color: #e0e0e0;
-    }
-
     .callout {
       margin-top: 1rem;
       background: rgba(255, 255, 255, 0.2);
@@ -69,18 +64,15 @@
     </div>
   </div>
 
-  <!-- QR code library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
-    // Retrieve form data
     const entry = JSON.parse(localStorage.getItem("currentEntry"));
     if (!entry) {
       document.body.innerHTML = "<h2>⚠️ No entry found. Please fill the form first.</h2>";
     } else {
-      // Generate QR with unique IDconst qrText = `${window.location.origin}/admit.html?id=${entry.id}`;
-      const qrText = `ExhibitionEntry_${entry.id}_${entry.name}`;
+      const qrURL = `${window.location.origin}/pages/admit.html?id=${entry.id}`;
       new QRCode(document.getElementById("qrcode"), {
-        text: qrText,
+        text: qrURL,
         width: 180,
         height: 180,
         colorDark: "#000000",
@@ -88,8 +80,7 @@
         correctLevel: QRCode.CorrectLevel.H
       });
 
-      document.getElementById("entryInfo").textContent =
-        `Your unique entry ID: #${entry.id}`;
+      document.getElementById("entryInfo").textContent = `Your unique entry ID: #${entry.id}`;
     }
   </script>
 </body>
