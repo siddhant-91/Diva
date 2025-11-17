@@ -116,84 +116,19 @@
     </form>
   </div>
 
-<!-- <script type="module">
-  const SUPABASE_URL = "https://ycsyluapxpbtyroehpbf.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3lsdWFweHBidHlyb2VocGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMjkyODgsImV4cCI6MjA3ODYwNTI4OH0._LOkkYJLgujnblQR8etynxRVAltRPU5YFJwTRgVgp30";
-
-  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  const params = new URLSearchParams(window.location.search);
-  const id = parseInt(params.get("id"));
-
-  const userNameEl = document.getElementById("userName");
-  const statusEl = document.getElementById("statusBox");
-  const admitBtn = document.getElementById("admitBtn");
-
-  if (!id) {
-    statusEl.textContent = "Invalid QR: ID missing.";
-    statusEl.className = "status error";
-  } else {
-    const { data, error } = await supabase
-      .from("exhibition1")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error || !data) {
-      statusEl.textContent = "User not found in database.";
-      statusEl.className = "status error";
-    } else {
-      userNameEl.innerHTML = `<h3>👤 ${data.name}</h3>`;
-
-      const admittedCount = data.admitted?.length ?? 0;
-
-      if (admittedCount > 0) {
-        statusEl.textContent = `🟢 User already admitted ${admittedCount} time(s).`;
-        statusEl.className = "status success";
-      }
-
-      admitBtn.style.display = "inline-block";
-
-      admitBtn.addEventListener("click", async () => {
-        const newAdmittedArray = [...data.admitted, true];
-        const newTimes = [...data.admitted_time, new Date().toISOString()];
-
-        const { error: updateError } = await supabase
-          .from("exhibition1")
-          .update({
-            admitted: newAdmittedArray,
-            admitted_time: newTimes
-          })
-          .eq("id", id);
-
-        if (updateError) {
-          alert("❌ Error updating admission.");
-          return;
-        }
-
-        statusEl.textContent = `✅ Admitted successfully! Total admissions: ${newAdmittedArray.length}`;
-        statusEl.className = "status success";
-        admitBtn.style.display = "none";
-      });
-    }
-  }
-</script> -->
-
 <script type="module">
   import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-  const SUPABASE_URL = "https://ycsyluapxpbtyroehpbf.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3lsdWFweHBidHlyb2VocGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMjkyODgsImV4cCI6MjA3ODYwNTI4OH0._LOkkYJLgujnblQR8etynxRVAltRPU5YFJwTRgVgp30";
+  // 🔴 Replace with your real Supabase credentials
+  SUPABASE_URL = "https://ycsyluapxpbtyroehpbf.supabase.co";
+  SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3lsdWFweHBidHlyb2VocGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMjkyODgsImV4cCI6MjA3ODYwNTI4OH0._LOkkYJLgujnblQR8etynxRVAltRPU5YFJwTRgVgp30";
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // 👇 Add this line so you can use it in console:
-  window.supabase = supabase;
+  window.supabase = supabase; // debugging use
 
   document.getElementById("entryForm").addEventListener("submit", async function (e) {
     e.preventDefault();
+    console.log("Form submit triggered"); // Debug check
 
     const formData = {
       name: document.getElementById("name").value.trim(),
@@ -202,18 +137,18 @@
       age: parseInt(document.getElementById("age").value),
       interest: document.getElementById("interest").value,
       submit_time: new Date().toISOString(),
-      admitted: [],
-      admitted_time: []
+      admitted: [],         // bool[]
+      admitted_time: []     // timestamptz[]
     };
 
     const { data, error } = await supabase
-      .from("exhibition1")   // or "exhibation1" (whichever is correct)
+      .from("exhibition1")  // ensure table name is correct
       .insert([formData])
       .select("id");
 
     if (error) {
       console.error("Supabase insert error:", error);
-      alert("❌ Failed to save. Check console.");
+      alert("❌ Failed to save. Check console for details.");
       return;
     }
 
@@ -221,3 +156,6 @@
     window.location.href = `qr.html?id=${newId}`;
   });
 </script>
+
+</body>
+</html>
