@@ -11,7 +11,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, #009213, #000428);
+      background: linear-gradient(135deg, #004e92, #000428);
       background-size: 300% 300%;
       animation: moveGradient 10s ease infinite;
       font-family: "Poppins", sans-serif;
@@ -80,7 +80,7 @@
 <body>
   <div class="form-container">
     <h2>Real Estate Exhibition Entry Form</h2>
-    <form id="entryForm" method="post">
+    <form id="entryForm">
       <div class="form-group">
         <label for="name">Full Name</label>
         <input id="name" name="name" type="text" required placeholder="Enter your name">
@@ -116,7 +116,7 @@
     </form>
   </div>
 
-<script type="module">
+<!-- <script type="module">
   const SUPABASE_URL = "https://ycsyluapxpbtyroehpbf.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3lsdWFweHBidHlyb2VocGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMjkyODgsImV4cCI6MjA3ODYwNTI4OH0._LOkkYJLgujnblQR8etynxRVAltRPU5YFJwTRgVgp30";
 
@@ -179,4 +179,43 @@
       });
     }
   }
+</script> -->
+
+
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+  const SUPABASE_URL = "https://ycsyluapxpbtyroehpbf.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3lsdWFweHBidHlyb2VocGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMjkyODgsImV4cCI6MjA3ODYwNTI4OH0._LOkkYJLgujnblQR8etynxRVAltRPU5YFJwTRgVgp30";
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  document.getElementById("entryForm").addEventListener("submit", async function(e) {
+    e.preventDefault(); // prevent form GET/POST posting to GitHub Pages
+
+    const formData = {
+      name: document.getElementById("name").value.trim(),
+      phone_number: document.getElementById("phone").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      age: parseInt(document.getElementById("age").value),
+      interest: document.getElementById("interest").value,
+      submit_time: new Date().toISOString(),
+      admitted: [],
+      admitted_time: []
+    };
+
+    const { data, error } = await supabase
+      .from("exhibition1")
+      .insert([formData])
+      .select("id, name");
+
+    if (error) {
+      console.error("Supabase insert error:", error);
+      alert("❌ Error saving your entry. Check console.");
+      return;
+    }
+
+    const newId = data[0].id;
+    window.location.href = `qr.html?id=${newId}`;
+  });
 </script>
