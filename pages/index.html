@@ -116,36 +116,67 @@
     </form>
   </div>
 
-  <script>
-    document.getElementById("entryForm").addEventListener("submit", function(e) {
-      e.preventDefault();
+<script type="module">
+  const SUPABASE_URL = "https://ycsyluapxpbtyroehpbf.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inljc3lsdWFweHBidHlyb2VocGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMjkyODgsImV4cCI6MjA3ODYwNTI4OH0._LOkkYJLgujnblQR8etynxRVAltRPU5YFJwTRgVgp30";
 
-      // Generate unique ID
-      let currentId = localStorage.getItem("lastEntryId") || 0;
-      currentId = parseInt(currentId) + 1;
-      localStorage.setItem("lastEntryId", currentId);
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-      // Build entry object
-      const formData = {
-        id: currentId,
-        name: document.getElementById("name").value,
-        phone: document.getElementById("phone").value,
-        email: document.getElementById("email").value,
-        age: document.getElementById("age").value,
-        interest: document.getElementById("interest").value
-      };
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // 🟢 Save to simulated DB
-      let db = JSON.parse(localStorage.getItem("entriesDB")) || [];
-      db.push({ ...formData, admitted: false });
-      localStorage.setItem("entriesDB", JSON.stringify(db));
+  const params = new URLSearchParams(window.location.search);
+  const id = parseInt(params.get("id"));
 
-      // Save for QR display
-      localStorage.setItem("currentEntry", JSON.stringify(formData));
+  const userNameEl = document.getElementById("userName");
+  const statusEl = document.getElementById("statusBox");
+  const admitBtn = document.getElementById("admitBtn");
 
-      // Redirect
-      window.location.href = "qr.html";
-    });
-  </script>
-</body>
-</html>
+  if (!id) {
+    statusEl.textContent = "Invalid QR: ID missing.";
+    statusEl.className = "status error";
+  } else {
+    const { data, error } = await supabase
+      .from("exhibition1")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error || !data) {
+      statusEl.textContent = "User not found in database.";
+      statusEl.className = "status error";
+    } else {
+      userNameEl.innerHTML = `<h3>👤 ${data.name}</h3>`;
+
+      const admittedCount = data.admitted?.length ?? 0;
+
+      if (admittedCount > 0) {
+        statusEl.textContent = `🟢 User already admitted ${admittedCount} time(s).`;
+        statusEl.className = "status success";
+      }
+
+      admitBtn.style.display = "inline-block";
+
+      admitBtn.addEventListener("click", async () => {
+        const newAdmittedArray = [...data.admitted, true];
+        const newTimes = [...data.admitted_time, new Date().toISOString()];
+
+        const { error: updateError } = await supabase
+          .from("exhibition1")
+          .update({
+            admitted: newAdmittedArray,
+            admitted_time: newTimes
+          })
+          .eq("id", id);
+
+        if (updateError) {
+          alert("❌ Error updating admission.");
+          return;
+        }
+
+        statusEl.textContent = `✅ Admitted successfully! Total admissions: ${newAdmittedArray.length}`;
+        statusEl.className = "status success";
+        admitBtn.style.display = "none";
+      });
+    }
+  }
+</script>
