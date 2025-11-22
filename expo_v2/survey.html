@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Survey</title>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #000428, #004e92);
+      color: white;
+      font-family: Poppins;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .box {
+      width: 380px;
+      background: rgba(255,255,255,0.12);
+      padding: 2rem;
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+    }
+    input, select {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+    button {
+      width: 100%;
+      padding: 0.7rem;
+      background: #00b4d8;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h3>Survey Questions</h3>
+
+  <label>Where do you currently live?</label>
+  <input id="current_city">
+
+  <label>Current Home BHK</label>
+  <input id="bhk">
+
+  <label>Washrooms</label>
+  <input id="wash">
+
+  <label>Current Zone</label>
+  <input id="zone">
+
+  <label>Where are you looking to buy?</label>
+  <input id="looking_city">
+
+  <label>Property Type</label>
+  <select id="ptype" onchange="showQuestions()">
+    <option value="">Select</option>
+    <option value="House">House</option>
+    <option value="Office">Office</option>
+  </select>
+
+  <div id="houseQ" style="display:none;">
+    <input placeholder="House Q1" id="q1">
+    <input placeholder="House Q2" id="q2">
+    <input placeholder="House Q3" id="q3">
+  </div>
+
+  <div id="officeQ" style="display:none;">
+    <input placeholder="Office Q1" id="oq1">
+    <input placeholder="Office Q2" id="oq2">
+    <input placeholder="Office Q3" id="oq3">
+  </div>
+
+  <button onclick="submitSurvey()">Submit</button>
+</div>
+
+<script type="module">
+  let CONFIG = {};
+
+  async function loadConfig() {
+      const res = await fetch("config.json");
+      CONFIG = await res.json();
+
+      window.supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+  }
+
+  await loadConfig();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const userID = urlParams.get("id");
+
+  window.showQuestions = () => {
+    const type = document.getElementById("ptype").value;
+
+    document.getElementById("houseQ").style.display = (type === "House") ? "block" : "none";
+    document.getElementById("officeQ").style.display = (type === "Office") ? "block" : "none";
+  };
+
+  window.submitSurvey = async () => {
+    const type = document.getElementById("ptype").value;
+
+    let q1 = "", q2 = "", q3 = "";
+
+    if (type === "House") {
+      q1 = document.getElementById("q1").value;
+      q2 = document.getElementById("q2").value;
+      q3 = document.getElementById("q3").value;
+    } else {
+      q1 = document.getElementById("oq1").value;
+      q2 = document.getElementById("oq2").value;
+      q3 = document.getElementById("oq3").value;
+    }
+
+    await supabase
+      .from("expo_v2")
+      .update({
+        current_city: document.getElementById("current_city").value,
+        current_bhk: document.getElementById("bhk").value,
+        current_washrooms: document.getElementById("wash").value,
+        current_zone: document.getElementById("zone").value,
+        looking_city: document.getElementById("looking_city").value,
+        property_type: type,
+        question_1: q1,
+        question_2: q2,
+        question_3: q3,
+        survey_completed: true
+      })
+      .eq("id", userID);
+
+    window.location.href = "thankyou.html";
+  };
+</script>
+
+</body>
+</html>
