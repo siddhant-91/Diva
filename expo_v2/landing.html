@@ -110,7 +110,20 @@
 
             newUserID = data[0].id;
 
-            alert("OTP Sent: " + generatedOTP);  // You will replace with SMS API
+            // alert("OTP Sent: " + generatedOTP);  // You will replace with SMS API
+            // Call Supabase edge function
+            await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/send-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                phone: phone,
+                otp: generatedOTP
+            })
+            });
+
+            // No need to show OTP now
+            alert("OTP sent successfully!");
+
             document.getElementById("step1").style.display = "none";
             document.getElementById("step2").style.display = "block";
         };
