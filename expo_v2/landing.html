@@ -81,6 +81,53 @@
         let newUserID = null;
         let generatedOTP = null;
 
+        // window.sendOTP = async () => {
+        //     const name = document.getElementById("name").value.trim();
+        //     const phone = document.getElementById("phone").value.trim();
+
+        //     if (!name || !phone) {
+        //         alert("Enter name and phone");
+        //         return;
+        //     }
+
+        //     generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
+
+        //     // INSERT new row for this user
+        //     const { data, error } = await supabase
+        //         .from("expo_v2")
+        //         .insert([{
+        //             full_name: name,
+        //             phone_number: phone,
+        //             otp_sent_time: new Date().toISOString()
+        //         }])
+        //         .select("id");
+
+        //     if (error) {
+        //         console.error(error);
+        //         alert("Error saving entry");
+        //         return;
+        //     }
+
+        //     newUserID = data[0].id;
+
+        //     // alert("OTP Sent: " + generatedOTP);  // You will replace with SMS API
+        //     // Call Supabase edge function
+        //     await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/send-otp`, {
+        //     method: "POST",
+        //     headers: { "Content-Type": "application/json" },
+        //     body: JSON.stringify({
+        //         phone: phone,
+        //         otp: generatedOTP
+        //     })
+        //     });
+
+        //     // No need to show OTP now
+        //     alert("OTP sent successfully!");
+
+        //     document.getElementById("step1").style.display = "none";
+        //     document.getElementById("step2").style.display = "block";
+        // };
+
         window.sendOTP = async () => {
             const name = document.getElementById("name").value.trim();
             const phone = document.getElementById("phone").value.trim();
@@ -92,41 +139,47 @@
 
             generatedOTP = Math.floor(1000 + Math.random() * 9000).toString();
 
-            // INSERT new row for this user
+            // 1️⃣ Save initial entry in Supabase
             const { data, error } = await supabase
                 .from("expo_v2")
                 .insert([{
-                    full_name: name,
-                    phone_number: phone,
-                    otp_sent_time: new Date().toISOString()
+                full_name: name,
+                phone_number: phone,
+                otp_sent_time: new Date().toISOString()
                 }])
                 .select("id");
 
             if (error) {
-                console.error(error);
                 alert("Error saving entry");
                 return;
             }
 
             newUserID = data[0].id;
 
-            // alert("OTP Sent: " + generatedOTP);  // You will replace with SMS API
-            // Call Supabase edge function
-            await fetch(`${CONFIG.SUPABASE_URL}/functions/v1/send-otp`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                phone: phone,
-                otp: generatedOTP
-            })
-            });
+            // 2️⃣ Call Supabase Edge Function → MSG91
+            const resp = await fetch(
+                "https://ycsyluapxpbtyroehpbf.supabase.co/functions/v1/send-otp",
+                {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    phone: phone,          // 📌 This is how number passes
+                    otp: generatedOTP
+                })
+                }
+            );
 
-            // No need to show OTP now
-            alert("OTP sent successfully!");
+            if (!resp.ok) {
+                alert("Failed to send OTP (SMS API error)");
+                return;
+            }
+
+            alert("OTP sent via SMS!");
 
             document.getElementById("step1").style.display = "none";
             document.getElementById("step2").style.display = "block";
-        };
+            };
+
 
         window.verifyOTP = async () => {
             const otp = document.getElementById("otp").value.trim();
