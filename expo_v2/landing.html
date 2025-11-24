@@ -104,6 +104,7 @@
   </div>
 
   <!-- MSG91 widget script -->
+   <script src="https://control.msg91.com/static/js/plugin/widget.js"></script>
   <script src="https://verify.msg91.com/otp-provider.js"></script>
 
   <!-- Main logic -->
@@ -126,7 +127,7 @@
 
       const configuration = {
         widgetId: config.MSG91_WIDGET_ID,
-        tokenAuth: "478723TRCN0mld65f69247f46P1",
+        tokenAuth: config.MSG91_TOKEN_AUTH,
         identifier: phone,
         exposeMethods: true,
 
