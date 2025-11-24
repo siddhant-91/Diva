@@ -1,37 +1,156 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
-  <title>Thank You</title>
+  <title>Registration Complete</title>
 
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
     body {
-      font-family: Poppins;
+      font-family: "Poppins", sans-serif;
       background: linear-gradient(135deg, #004e92, #000428);
       height: 100vh;
-      color: white;
+      margin: 0;
+
       display: flex;
       justify-content: center;
       align-items: center;
+      padding: 20px;
+      color: white;
     }
 
-    .box {
+    .card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(14px);
+      padding: 2.8rem 3rem;
+      border-radius: 20px;
       text-align: center;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 2.2rem 3rem;
-      border-radius: 16px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.25);
+      animation: fadeIn 0.9s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Checkmark animation */
+    .circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 15px auto;
+      background: rgba(255, 255, 255, 0.25);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: popIn 0.5s ease-out;
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .checkmark {
+      font-size: 42px;
+      font-weight: bold;
+      color: #9fffa9;
+      animation: tick 0.6s ease-in-out;
+    }
+
+    @keyframes tick {
+      0% {
+        transform: scale(0);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    h2 {
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 1.6rem;
+    }
+
+    #welcomeName {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #ffe28a;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #f5f5f5;
+      margin-top: 5px;
     }
   </style>
 
 </head>
 
 <body>
-  <div class="box">
-    <h2>Thank You!</h2>
-    <p>You are now successfully registered for the Real Estate Expo.</p>
-    <p>Show this confirmation at the venue.</p>
+
+  <div class="card">
+
+    <div class="circle">
+      <div class="checkmark">&#10004;</div>
+    </div>
+
+    <h2>Registration Successful</h2>
+    <div id="welcomeName">Welcome, <span id="userFullName"></span></div>
+
+    <p>Your registration for the <strong>Real Estate Expo</strong> is confirmed.</p>
+    <p>Please keep this confirmation screen handy at the entry.</p>
+
   </div>
+
+
+  <!-- Load config + supabase -->
+  <script type="module">
+    import { loadConfig } from "./supabase.js";
+
+    const config = await loadConfig();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get("id");
+
+    if (userId) {
+      const { data, error } = await window.supabase
+        .from("expo_v2")
+        .select("full_name")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (!error && data) {
+        document.getElementById("userFullName").innerText = data.full_name;
+        document.getElementById("welcomeName").style.display = "block";
+      }
+    }
+  </script>
+
 </body>
 
 </html>

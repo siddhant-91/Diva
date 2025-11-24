@@ -89,53 +89,29 @@
   </div>
 
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-    let CONFIG = {};
-
-    async function loadConfig() {
-      const res = await fetch("config.json");
-      CONFIG = await res.json();
-
-      window.supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-    }
-
+    import { loadConfig } from "./supabase.js";
     await loadConfig();
+
+    const supabase = window.supabase;
 
     const urlParams = new URLSearchParams(window.location.search);
     const userID = urlParams.get("id");
 
-    window.showQuestions = () => {
-      const type = document.getElementById("ptype").value;
-
-      document.getElementById("houseQ").style.display = (type === "House") ? "block" : "none";
-      document.getElementById("officeQ").style.display = (type === "Office") ? "block" : "none";
-    };
-
     window.submitSurvey = async () => {
-      const type = document.getElementById("ptype").value;
+      const propertyType = document.getElementById("ptype").value;
 
-      let q1 = "", q2 = "", q3 = "";
+      const q1 = propertyType === "House" ? document.getElementById("q1").value : document.getElementById("oq1").value;
+      const q2 = propertyType === "House" ? document.getElementById("q2").value : document.getElementById("oq2").value;
+      const q3 = propertyType === "House" ? document.getElementById("q3").value : document.getElementById("oq3").value;
 
-      if (type === "House") {
-        q1 = document.getElementById("q1").value;
-        q2 = document.getElementById("q2").value;
-        q3 = document.getElementById("q3").value;
-      } else {
-        q1 = document.getElementById("oq1").value;
-        q2 = document.getElementById("oq2").value;
-        q3 = document.getElementById("oq3").value;
-      }
-
-      await supabase
-        .from("expo_v2")
+      await supabase.from("expo_v2")
         .update({
           current_city: document.getElementById("current_city").value,
           current_bhk: document.getElementById("bhk").value,
           current_washrooms: document.getElementById("wash").value,
           current_zone: document.getElementById("zone").value,
           looking_city: document.getElementById("looking_city").value,
-          property_type: type,
+          property_type: propertyType,
           question_1: q1,
           question_2: q2,
           question_3: q3,
@@ -146,6 +122,7 @@
       window.location.href = "thankyou.html";
     };
   </script>
+
 
 </body>
 
