@@ -2,8 +2,8 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Expo Registration</title>
 
   <style>
@@ -68,7 +68,7 @@
 
     button {
       width: 100%;
-      padding: 0.75rem;
+      padding: 0.7rem;
       border: none;
       border-radius: 8px;
       background: #00b4d8;
@@ -79,10 +79,14 @@
       margin-top: 4px;
     }
 
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    button:hover {
+      background: #0092b3;
     }
+
+    #otp-ui {
+      margin-top: 15px;
+    }
+
   </style>
 </head>
 
@@ -100,49 +104,47 @@
 
     <button id="sendOtpBtn">Send OTP</button>
 
-    <!-- MSG91 OTP widget will auto-inject OTP UI below -->
+    <!-- OTP UI will be rendered here automatically -->
     <div id="otp-ui"></div>
+
   </div>
 
-  <!-- NEW MSG91 widget script (from your integration page!) -->
-  <script src="https://control.msg91.com/app/assets/widget/otp-widget.js"></script>
+  <!-- MSG91 widget script -->
+  <script src="https://verify.msg91.com/otp-provider.js"></script>
 
-  <!-- App Logic -->
+  <!-- MAIN LOGIC -->
   <script type="module">
     import { loadConfig } from "./supabase.js";
     const config = await loadConfig();
     const supabase = window.supabase;
 
-    const sendOtpBtn = document.getElementById("sendOtpBtn");
+    const sendBtn = document.getElementById("sendOtpBtn");
+    const otpContainer = document.getElementById("otp-ui");
 
-    sendOtpBtn.addEventListener("click", async () => {
+    sendBtn.addEventListener("click", () => {
       const name = document.getElementById("fullName").value.trim();
-      const rawPhone = document.getElementById("phoneNumber").value.trim();
+      const raw = document.getElementById("phoneNumber").value.trim();
 
-      if (!name || rawPhone.length !== 10) {
-        alert("Please enter a valid name & phone number.");
+      if (!name || raw.length !== 10) {
+        alert("Enter valid name and 10-digit phone number");
         return;
       }
 
-      const fullPhone = "91" + rawPhone;
+      const phone = "91" + raw;
 
-      sendOtpBtn.disabled = true;
-      sendOtpBtn.textContent = "Sending OTP...";
-
-      // Call MSG91 NEW WIDGET METHOD
-      window.initiateOTP({
-        widgetId: config.MSG91_WIDGET_ID,
+      const configuration = {
+        widgetId: "356b73725874373039373139",
         tokenAuth: config.MSG91_TOKEN_AUTH,
-        identifier: fullPhone,
-        onSuccess: async (otpResponse) => {
-          console.log("OTP Verified:", otpResponse);
+        identifier: phone,
+        exposeMethods: false, // default UI
+        success: async (data) => {
+          console.log("OTP Verified:", data);
 
-          // Save to Supabase
-          const { data, error } = await supabase
+          const { data: saved, error } = await supabase
             .from("expo_v2")
             .insert([{
               full_name: name,
-              phone_number: rawPhone,  // YOU WANT RAW
+              phone_number: raw,
               otp_verified: true,
               otp_verified_time: new Date().toISOString()
             }])
@@ -150,21 +152,26 @@
 
           if (error) {
             console.error(error);
-            alert("Database error.");
+            alert("Database error");
             return;
           }
 
-          window.location.href = `survey.html?id=${data[0].id}`;
+          window.location.href = `survey.html?id=${saved[0].id}`;
         },
-        onFailure: (err) => {
-          console.error("OTP failed:", err);
-          alert("OTP failed. Try again.");
-          sendOtpBtn.disabled = false;
-          sendOtpBtn.textContent = "Send OTP";
+        failure: (err) => {
+          console.log("OTP failed:", err);
         }
-      });
+      };
+
+      // Load MSG91 OTP widget
+      otpContainer.innerHTML = ""; // clear old UI
+      window.initSendOTP(configuration);
+
+      sendBtn.innerText = "Sending OTP...";
+      sendBtn.disabled = true;
     });
   </script>
 
 </body>
+
 </html>
